@@ -1,3 +1,5 @@
+
+
 .logo.vite:hover {
   filter: drop-shadow(0 0 2em #747bff);
 }
@@ -5,6 +7,7 @@
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafb);
 }
+
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
@@ -113,4 +116,11 @@ button {
   button:active {
     background-color: #0f0f0f69;
   }
+}
+
+.before-img {
+  width: auto;
+  height: 100px;
+  object-fit: cover;
+  margin: 10px;
 }

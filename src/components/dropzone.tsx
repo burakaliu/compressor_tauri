@@ -1,5 +1,6 @@
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import "./Dropzone.css";
 
 interface MyDropzoneProps {
   onImageUpload: (files: File[]) => void;
@@ -21,12 +22,7 @@ export function MyDropzone({onImageUpload}: MyDropzoneProps) {
   });
 
   return (
-    <div {...getRootProps()} style={{ 
-      border: '2px dashed #ccc', 
-      padding: '20px', 
-      textAlign: 'center',
-      cursor: 'pointer'
-    }}>
+    <div {...getRootProps()} className="dropzone">
       <input {...getInputProps()} />
       {isDragActive ? (
         <p>Drop the images here ...</p>

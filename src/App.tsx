@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import { MyDropzone } from "./components/dropzone";
+import { open } from "@tauri-apps/plugin-dialog";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
-  const [slapMsg, setSlapMsg] = useState("");
   const [name, setName] = useState("");
   const [images, setImages] = useState<File[] | undefined>();
-  const [compressedImages, setCompressedImages] = useState<
-    string[]
-  >([]);
+  const [compressedImages, setCompressedImages] = useState<string[]>([]);
 
   async function greet() {
     // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -21,15 +18,6 @@ function App() {
   useEffect(() => {
     invoke<string[]>("get_compressed_images").then(setCompressedImages);
   }, []);
-
-  async function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
-    console.log("Image change event:", event);
-    const target = event.target as HTMLInputElement & {
-      files: FileList | null;
-    };
-    setImages(target.files ? Array.from(target.files) : undefined);
-    console.log("Files:", target.files);
-  }
 
   async function handleImageDrop(files: File[]) {
     console.log("Files dropped:", files);
@@ -66,6 +54,13 @@ function App() {
     }
   }
 
+  async function handleExport() {
+    const dir = await open({ directory: true });
+    if (dir) {
+      await invoke("export_compressed_images", { destination: dir });
+    }
+  }
+
   return (
     <main className="container">
       <h1>Welcome to Tauri + React</h1>
@@ -94,29 +89,34 @@ function App() {
         Click to run compressor
       </button>
 
+      <button type="button" onClick={handleExport}>
+        Export Compressed Images
+      </button>
+
       <div className="row">
         <div className="card">
           <p>Before</p>
-          <img
-            src={reactLogo}
-            className="logo react"
-            alt="React logo"
-            style={{ width: "100px", height: "100px" }}
-          />
+          {images?.map((file, i) => (
+            <img
+              className={"before-img"}
+              key={i}
+              src={URL.createObjectURL(file)}
+              alt={`original-${i}`}
+            />
+          ))}
         </div>
         <div className="card">
           <p>After</p>
-          <img
-            src={reactLogo}
-            className="logo react"
-            alt="React logo"
-            style={{ width: "100px", height: "100px" }}
-          />
-        </div>
-        <div>
-          {compressedImages.map((src, i) => (
-            <img key={i} src={src} alt={`compressed-${i}`} />
-          ))}
+          <div>
+            {compressedImages.map((src, i) => (
+              <img
+                className={"before-img"}
+                key={i}
+                src={src}
+                alt={`compressed-${i}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </main>

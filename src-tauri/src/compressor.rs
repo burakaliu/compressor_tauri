@@ -1,16 +1,14 @@
+use base64::prelude::*;
 use image_compressor::Factor;
 use image_compressor::FolderCompressor;
 use std::fs;
 use std::io::Write;
 use std::sync::mpsc;
-use base64::prelude::*;
 
 // Import the global path functions from lib.rs
 use crate::{get_input_path, get_output_path};
 
 static THREAD_COUNT: u32 = 4; // number of threads
-
-
 
 #[tauri::command]
 pub fn handle_images(images: Vec<String>) -> Result<(), String> {
@@ -24,7 +22,9 @@ pub fn handle_images(images: Vec<String>) -> Result<(), String> {
             .nth(1)
             .ok_or("Invalid base64 image format")?;
 
-        let decoded_bytes = BASE64_STANDARD.decode(base64_str).map_err(|e| e.to_string())?;
+        let decoded_bytes = BASE64_STANDARD
+            .decode(base64_str)
+            .map_err(|e| e.to_string())?;
 
         // Infer image type (you could parse it from the header if needed)
         let output_path = source.join(format!("image_{}.png", i)); // or jpg
@@ -57,13 +57,40 @@ pub fn compress() {
     }
 
     //clear input folder
-    if let Err(e) = fs::remove_dir_all(&source) {
-        println!("Error clearing input folder: {}", e);
-    }
+    // if let Err(e) = fs::remove_dir_all(&source) {
+    //     println!("Error clearing input folder: {}", e);
+    // }
 
-    //recreate input folder
-    if let Err(e) = fs::create_dir_all(&source) {
-        println!("Error recreating input folder: {}", e);
-    }
-    
+    // //recreate input folder
+    // if let Err(e) = fs::create_dir_all(&source) {
+    //     println!("Error recreating input folder: {}", e);
+    // }
 } // Sender and Receiver. for more info, check mpsc and message passing.
+
+#[tauri::command]
+pub fn clear_input_folder() -> Result<(), String> {
+    let input_path = get_input_path();
+
+    // Clear the input folder
+    fs::remove_dir_all(&input_path)
+        .map_err(|e| e.to_string())
+        .and_then(|_| {
+            // Recreate the input folder
+            fs::create_dir_all(&input_path).map_err(|e| e.to_string())
+        })
+        .map(|_| ())
+}
+
+#[tauri::command]
+pub fn clear_output_folder() -> Result<(), String> {
+    let output_path = get_output_path();
+
+    // Clear the output folder
+    fs::remove_dir_all(&output_path)
+        .map_err(|e| e.to_string())
+        .and_then(|_| {
+            // Recreate the output folder
+            fs::create_dir_all(&output_path).map_err(|e| e.to_string())
+        })
+        .map(|_| ())
+}

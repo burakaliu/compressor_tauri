@@ -1,7 +1,8 @@
+use base64::prelude::*;
 use std::fs;
+use std::io::Read;
 use std::path::PathBuf;
 use std::sync::OnceLock;
-use base64::prelude::*;
 use tauri::Manager;
 
 mod compressor;
@@ -29,8 +30,12 @@ fn initialize_image_paths(app_data_dir: PathBuf) -> Result<(), Box<dyn std::erro
     fs::create_dir_all(&output_dir)?;
 
     // Set the global paths
-    INPUT_PATH.set(input_dir).map_err(|_| "Failed to set input path")?;
-    OUTPUT_PATH.set(output_dir).map_err(|_| "Failed to set output path")?;
+    INPUT_PATH
+        .set(input_dir)
+        .map_err(|_| "Failed to set input path")?;
+    OUTPUT_PATH
+        .set(output_dir)
+        .map_err(|_| "Failed to set output path")?;
 
     Ok(())
 }
@@ -42,9 +47,6 @@ fn greet(name: &str) -> String {
 
 #[tauri::command]
 fn get_compressed_images() -> Result<Vec<String>, String> {
-    use std::fs;
-    use std::io::Read;
-
     let mut base64_images = Vec::new();
     let OUTPUT_DIR = get_output_path();
 
@@ -76,20 +78,41 @@ fn get_compressed_images() -> Result<Vec<String>, String> {
     Ok(base64_images)
 }
 
+#[tauri::command]
+fn export_compressed_images(destination: String) -> Result<(), String> {
+    let OUTPUT_DIR = get_output_path();
+
+    for entry in std::fs::read_dir(&*OUTPUT_DIR).map_err(|e| e.to_string())? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let path = entry.path();
+        if path.is_file() {
+            let file_name = path.file_name().ok_or("Invalid file name")?;
+            let dest_path = std::path::Path::new(&destination).join(file_name);
+            fs::copy(&path, &dest_path).map_err(|e| e.to_string())?;
+        }
+    }
+
+    Ok(())
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
         .setup(|app| {
             let app_data = app.path().app_data_dir().unwrap();
             initialize_image_paths(app_data)?;
+            println!("Input path: {:?}", get_input_path());
+            println!("Output path: {:?}", get_output_path());
 
             Ok(())
         })
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             greet,
             get_compressed_images,
+            export_compressed_images,
             compressor::compress,
             compressor::handle_images
         ])
