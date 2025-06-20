@@ -3,12 +3,14 @@ import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import { MyDropzone } from "./components/dropzone";
 import { open } from "@tauri-apps/plugin-dialog";
+import ResultsPage from "./components/ResultsPage";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
   const [images, setImages] = useState<File[] | undefined>();
   const [compressedImages, setCompressedImages] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState<'main' | 'results'>('main');
 
   async function greet() {
     // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -49,6 +51,8 @@ function App() {
         })
       );
       await invoke("handle_images", { images: base64Images });
+      // Navigate to results page after compression
+      setCurrentPage('results');
     } else {
       console.error("No images selected ", images);
     }
@@ -62,64 +66,47 @@ function App() {
   }
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+    <>
+      {currentPage === 'main' ? (
+        <main className="container">
+          <h1>Welcome to Tauri + React</h1>
 
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-
-      <MyDropzone onImageUpload={handleImageDrop} />
-
-      <br />
-
-      <button type="button" onClick={() => handleImageUpload(images || [])}>
-        Click to run compressor
-      </button>
-
-      <button type="button" onClick={handleExport}>
-        Export Compressed Images
-      </button>
-
-      <div className="row">
-        <div className="card">
-          <p>Before</p>
-          {images?.map((file, i) => (
-            <img
-              className={"before-img"}
-              key={i}
-              src={URL.createObjectURL(file)}
-              alt={`original-${i}`}
+          <form
+            className="row"
+            onSubmit={(e) => {
+              e.preventDefault();
+              greet();
+            }}
+          >
+            <input
+              id="greet-input"
+              onChange={(e) => setName(e.currentTarget.value)}
+              placeholder="Enter a name..."
             />
-          ))}
-        </div>
-        <div className="card">
-          <p>After</p>
-          <div>
-            {compressedImages.map((src, i) => (
-              <img
-                className={"before-img"}
-                key={i}
-                src={src}
-                alt={`compressed-${i}`}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </main>
+            <button type="submit">Greet</button>
+          </form>
+          <p>{greetMsg}</p>
+
+          <MyDropzone onImageUpload={handleImageDrop} />
+
+          <br />
+
+          <button type="button" onClick={() => handleImageUpload(images || [])}>
+            Click to run compressor
+          </button>
+
+          <button type="button" onClick={handleExport}>
+            Export Compressed Images
+          </button>
+
+          <button type="button" onClick={() => setCurrentPage('results')}>
+            View Results
+          </button>
+        </main>
+      ) : (
+        <ResultsPage onBackToMain={() => setCurrentPage('main')} />
+      )}
+    </>
   );
 }
 

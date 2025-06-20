@@ -48,9 +48,9 @@ fn greet(name: &str) -> String {
 #[tauri::command]
 fn get_compressed_images() -> Result<Vec<String>, String> {
     let mut base64_images = Vec::new();
-    let OUTPUT_DIR = get_output_path();
+    let output_dir = get_output_path();
 
-    for entry in fs::read_dir(&*OUTPUT_DIR).map_err(|e| e.to_string())? {
+    for entry in fs::read_dir(&*output_dir).map_err(|e| e.to_string())? {
         let entry = entry.map_err(|e| e.to_string())?;
         let path = entry.path();
 
@@ -80,9 +80,9 @@ fn get_compressed_images() -> Result<Vec<String>, String> {
 
 #[tauri::command]
 fn export_compressed_images(destination: String) -> Result<(), String> {
-    let OUTPUT_DIR = get_output_path();
+    let output_dir = get_output_path();
 
-    for entry in std::fs::read_dir(&*OUTPUT_DIR).map_err(|e| e.to_string())? {
+    for entry in std::fs::read_dir(&*output_dir).map_err(|e| e.to_string())? {
         let entry = entry.map_err(|e| e.to_string())?;
         let path = entry.path();
         if path.is_file() {
@@ -93,6 +93,39 @@ fn export_compressed_images(destination: String) -> Result<(), String> {
     }
 
     Ok(())
+}
+
+#[tauri::command]
+fn get_original_images() -> Result<Vec<String>, String> {
+    let mut base64_images = Vec::new();
+    let input_dir = get_input_path();
+
+    for entry in fs::read_dir(&*input_dir).map_err(|e| e.to_string())? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let path = entry.path();
+
+        if path.is_file() {
+            let mut file = fs::File::open(&path).map_err(|e| e.to_string())?;
+            let mut buffer = Vec::new();
+            file.read_to_end(&mut buffer).map_err(|e| e.to_string())?;
+
+            let mime = if let Some(ext) = path.extension() {
+                match ext.to_str().unwrap_or("").to_lowercase().as_str() {
+                    "jpg" | "jpeg" => "image/jpeg",
+                    "png" => "image/png",
+                    "webp" => "image/webp",
+                    _ => "application/octet-stream",
+                }
+            } else {
+                "application/octet-stream"
+            };
+
+            let encoded = BASE64_STANDARD.encode(&buffer);
+            base64_images.push(format!("data:{};base64,{}", mime, encoded));
+        }
+    }
+
+    Ok(base64_images)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -113,8 +146,10 @@ pub fn run() {
             greet,
             get_compressed_images,
             export_compressed_images,
+            get_original_images,
             compressor::compress,
-            compressor::handle_images
+            compressor::handle_images,
+            compressor::get_image_metadata
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
