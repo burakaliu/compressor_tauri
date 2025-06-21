@@ -9,8 +9,8 @@ function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
   const [images, setImages] = useState<File[] | undefined>();
-  const [compressedImages, setCompressedImages] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState<'main' | 'results'>('main');
+  const [imagesDropped, setImagesDropped] = useState(false);
 
   async function greet() {
     // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -18,7 +18,7 @@ function App() {
   }
 
   useEffect(() => {
-    invoke<string[]>("get_compressed_images").then(setCompressedImages);
+    // Remove this useEffect since we handle images in ResultsPage
   }, []);
 
   async function handleImageDrop(files: File[]) {
@@ -26,21 +26,25 @@ function App() {
     if (files.length > 0) {
       setImages(files);
       console.log("Image files set in state:", files);
+      setImagesDropped(true);
     } else {
       console.error("No files dropped");
     }
   }
 
   async function handleImageUpload(_images: File[]) {
-    // send as base64
+    // send as base64 with filenames
     if (_images && _images.length > 0) {
-      const base64Images = await Promise.all(
+      const imageDataArray = await Promise.all(
         _images.map((file) => {
-          return new Promise<string>((resolve, reject) => {
+          return new Promise<{data: string, filename: string}>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (e) => {
               if (e.target?.result) {
-                resolve(e.target.result as string);
+                resolve({
+                  data: e.target.result as string,
+                  filename: file.name
+                });
               } else {
                 reject(new Error("Failed to read file"));
               }
@@ -50,7 +54,8 @@ function App() {
           });
         })
       );
-      await invoke("handle_images", { images: base64Images });
+      await invoke("handle_images", { images: imageDataArray });
+      imagesDropped && setImagesDropped(false); // Reset images dropped state
       // Navigate to results page after compression
       setCurrentPage('results');
     } else {
@@ -65,11 +70,16 @@ function App() {
     }
   }
 
+  function resetImages() {
+    setImages(undefined);
+    setImagesDropped(false);
+  }
+
   return (
     <>
       {currentPage === 'main' ? (
         <main className="container">
-          <h1>Welcome to Tauri + React</h1>
+          <h1>Welcome to image Compressor</h1>
 
           <form
             className="row"
@@ -87,7 +97,28 @@ function App() {
           </form>
           <p>{greetMsg}</p>
 
-          <MyDropzone onImageUpload={handleImageDrop} />
+          { imagesDropped ? (
+            <div className="images-dropped">
+              <p>Images ready for compression: {images?.length}</p>
+            <ul className="image-list">
+              {images?.map((file, index) => {
+                const imageUrl = URL.createObjectURL(file);
+                return (
+                  <div key={index} className="image-card">
+                    <li className="before-img-name">{file.name}</li>
+                    <img src={imageUrl} alt={file.name} className="before-img"/>
+                  </div>
+                );
+              })}
+            </ul>
+                      <button type="button" onClick={() => resetImages()} className="reset-images-button">
+            <span className="reset-images">Reset Images</span>
+          </button>
+            </div>
+          ) : (
+            <MyDropzone onImageUpload={handleImageDrop} />
+          )}
+
 
           <br />
 

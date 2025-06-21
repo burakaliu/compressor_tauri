@@ -4,6 +4,7 @@ import './ResultsPage.css';
 
 interface ImageMetadata {
   original_name: string;
+  compressed_name: string;
   original_size: number;
   compressed_size: number | null;
   input_path: string;
@@ -49,6 +50,7 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
           <span>Original: {formatFileSize(metadata.original_size)}</span>
           <span>Compressed: {metadata.compressed_size ? formatFileSize(metadata.compressed_size) : 'N/A'}</span>
           <span className="compression-ratio">Saved: {compressionRatio}%</span>
+          <span className="compressed-name">→ {metadata.compressed_name}</span>
         </div>
       </div>
       
@@ -159,7 +161,10 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ onBackToMain }) => {
 
         {selectedImage && (
           <div className="detailed-view">
-            <h2>Detailed Comparison: {selectedImage.original_name}</h2>
+            <h2>Detailed Comparison</h2>
+            <p className="filename-comparison">
+              <strong>Original:</strong> {selectedImage.original_name} → <strong>Compressed:</strong> {selectedImage.compressed_name}
+            </p>
             <div className="side-by-side">
               <div className="image-detail">
                 <h3>Original</h3>

@@ -124,3 +124,48 @@ button {
   object-fit: cover;
   margin: 10px;
 }
+
+.before-img-name{
+  font-weight: bold;
+  color: #333;
+  margin-top: 10px;
+  text-decoration: none;
+}
+
+.image-list {
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  padding: 0;
+  margin: 0;
+  width: 80%;
+  align-items: center;
+  margin: 20px;
+}
+
+.image-card{
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 10px;
+  width: 200px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.image-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.images-dropped {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
