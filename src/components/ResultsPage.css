@@ -206,6 +206,171 @@
   font-size: 14px;
 }
 
+.diagnostics-section {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.diagnostics-section h3 {
+  margin: 0 0 15px 0;
+  color: #495057;
+  font-size: 1.2rem;
+}
+
+.diagnostics-text {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 15px;
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  color: #495057;
+  overflow-x: auto;
+}
+
+/* Success indicator for diagnostics */
+.diagnostics-text:contains("✅") {
+  border-left: 4px solid #28a745;
+}
+
+/* Warning indicator for diagnostics */
+.diagnostics-text:contains("⚠️") {
+  border-left: 4px solid #ffc107;
+}
+
+/* Error indicator for diagnostics */
+.diagnostics-text:contains("❌") {
+  border-left: 4px solid #dc3545;
+}
+
+/* Settings Page Styles */
+.settings-content {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.setting-group {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.setting-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #495057;
+  font-size: 16px;
+}
+
+.setting-group input[type="range"] {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #ddd;
+  outline: none;
+  margin: 10px 0;
+}
+
+.setting-group input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+}
+
+.setting-group input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+  border: none;
+}
+
+.setting-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+.setting-value {
+  display: inline-block;
+  background: #007bff;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+.setting-group small {
+  display: block;
+  color: #6c757d;
+  font-size: 12px;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.save-button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: block;
+  margin: 30px auto 0 auto;
+}
+
+.save-button:hover {
+  background: #218838;
+}
+
+.settings-info {
+  max-width: 600px;
+  margin: 40px auto 0 auto;
+  padding: 20px;
+  background: #e9ecef;
+  border-radius: 8px;
+  border-left: 4px solid #17a2b8;
+}
+
+.settings-info h3 {
+  margin: 0 0 15px 0;
+  color: #495057;
+}
+
+.settings-info ul {
+  list-style: disc;
+  padding-left: 20px;
+  color: #495057;
+}
+
+.settings-info li {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .header {

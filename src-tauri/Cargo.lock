@@ -608,8 +608,11 @@ name = "compressor_tauri"
 version = "0.1.0"
 dependencies = [
  "base64 0.22.1",
+ "image",
  "image_compressor",
+ "mozjpeg",
  "once_cell",
+ "rayon",
  "serde",
  "serde_json",
  "tauri",

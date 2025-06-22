@@ -1,44 +1,11 @@
 use base64::prelude::*;
 use std::fs;
 use std::io::Read;
-use std::path::PathBuf;
-use std::sync::OnceLock;
 use tauri::Manager;
 
 mod compressor;
-
-// Global static variables for image paths
-static INPUT_PATH: OnceLock<PathBuf> = OnceLock::new();
-static OUTPUT_PATH: OnceLock<PathBuf> = OnceLock::new();
-
-// Public functions to access the global paths
-pub fn get_input_path() -> &'static PathBuf {
-    INPUT_PATH.get().expect("Input path not initialized")
-}
-
-pub fn get_output_path() -> &'static PathBuf {
-    OUTPUT_PATH.get().expect("Output path not initialized")
-}
-
-// Initialize the global paths (called during setup)
-fn initialize_image_paths(app_data_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-    let input_dir = app_data_dir.join("images/input");
-    let output_dir = app_data_dir.join("images/output");
-
-    // Create directories if they don't exist
-    fs::create_dir_all(&input_dir)?;
-    fs::create_dir_all(&output_dir)?;
-
-    // Set the global paths
-    INPUT_PATH
-        .set(input_dir)
-        .map_err(|_| "Failed to set input path")?;
-    OUTPUT_PATH
-        .set(output_dir)
-        .map_err(|_| "Failed to set output path")?;
-
-    Ok(())
-}
+mod utility;
+mod lossy_compressor;
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -48,7 +15,7 @@ fn greet(name: &str) -> String {
 #[tauri::command]
 fn get_compressed_images() -> Result<Vec<String>, String> {
     let mut base64_images = Vec::new();
-    let output_dir = get_output_path();
+    let output_dir = crate::utility::get_output_path();
 
     for entry in fs::read_dir(&*output_dir).map_err(|e| e.to_string())? {
         let entry = entry.map_err(|e| e.to_string())?;
@@ -80,7 +47,7 @@ fn get_compressed_images() -> Result<Vec<String>, String> {
 
 #[tauri::command]
 fn export_compressed_images(destination: String) -> Result<(), String> {
-    let output_dir = get_output_path();
+    let output_dir = crate::utility::get_output_path();
 
     for entry in std::fs::read_dir(&*output_dir).map_err(|e| e.to_string())? {
         let entry = entry.map_err(|e| e.to_string())?;
@@ -98,7 +65,7 @@ fn export_compressed_images(destination: String) -> Result<(), String> {
 #[tauri::command]
 fn get_original_images() -> Result<Vec<String>, String> {
     let mut base64_images = Vec::new();
-    let input_dir = get_input_path();
+    let input_dir = crate::utility::get_input_path();
 
     for entry in fs::read_dir(&*input_dir).map_err(|e| e.to_string())? {
         let entry = entry.map_err(|e| e.to_string())?;
@@ -134,9 +101,9 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
             let app_data = app.path().app_data_dir().unwrap();
-            initialize_image_paths(app_data)?;
-            println!("Input path: {:?}", get_input_path());
-            println!("Output path: {:?}", get_output_path());
+            crate::utility::initialize_image_paths(app_data)?;
+            println!("Input path: {:?}", crate::utility::get_input_path());
+            println!("Output path: {:?}", crate::utility::get_output_path());
 
             Ok(())
         })
@@ -147,9 +114,11 @@ pub fn run() {
             get_compressed_images,
             export_compressed_images,
             get_original_images,
+            lossy_compressor::lossy_compression,
             compressor::compress,
             compressor::handle_images,
-            compressor::get_image_metadata
+            compressor::get_image_metadata,
+            compressor::get_compression_diagnostics
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

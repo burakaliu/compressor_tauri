@@ -79,6 +79,7 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ onBackToMain }) => {
   const [compressedImages, setCompressedImages] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState<ImageMetadata | null>(null);
   const [loading, setLoading] = useState(true);
+  const [diagnostics, setDiagnostics] = useState<string>('');
 
   useEffect(() => {
     loadImages();
@@ -88,16 +89,18 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ onBackToMain }) => {
     try {
       setLoading(true);
       
-      // Get metadata, original images, and compressed images
-      const [metadata, original, compressed] = await Promise.all([
+      // Get metadata, original images, compressed images, and diagnostics
+      const [metadata, original, compressed, diag] = await Promise.all([
         invoke<ImageMetadata[]>('get_image_metadata'),
         invoke<string[]>('get_original_images'),
-        invoke<string[]>('get_compressed_images')
+        invoke<string[]>('get_compressed_images'),
+        invoke<string>('get_compression_diagnostics')
       ]);
 
       setImageMetadata(metadata);
       setOriginalImages(original);
       setCompressedImages(compressed);
+      setDiagnostics(diag);
       
       if (metadata.length > 0) {
         setSelectedImage(metadata[0]);
@@ -144,6 +147,13 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ onBackToMain }) => {
           <span>{imageMetadata.length} images processed</span>
         </div>
       </div>
+
+      {diagnostics && (
+        <div className="diagnostics-section">
+          <h3>Compression Analysis</h3>
+          <pre className="diagnostics-text">{diagnostics}</pre>
+        </div>
+      )}
 
       <div className="content">
         <div className="images-grid">
