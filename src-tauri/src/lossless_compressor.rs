@@ -1,42 +1,44 @@
-use base64::prelude::BASE64_STANDARD;
-use image::GenericImageView;
-use image::ImageReader;
-use mozjpeg::{ColorSpace, Compress};
-use rayon::prelude::*;
-use rayon::result;
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
-
+use crate::lossy_compressor::compress_image_lossy;
 use crate::utility::{
     clear_output_folder, deduplicate_path, get_input_path, get_output_path, CompressionResult,
 };
+use oxipng::{optimize, InFile, Options, OutFile};
+use std::fs;
+use std::path::PathBuf;
+use rayon::prelude::*;
+
 
 #[tauri::command]
-pub fn lossy_compression() -> Result<Vec<CompressionResult>, String> {
-    // This function implements lossy compression using mozjpeg
-    println!("Lossy compression function called.");
+pub fn lossless_compression() -> Result<Vec<CompressionResult>, String> {
+    println!("Lossless compression function called.");
 
     let input_dir = get_input_path().clone();
     let output_dir = get_output_path().clone();
-
     println!("Input path: {:?}", &input_dir);
     println!("Output path: {:?}", &output_dir);
 
-    clear_output_folder().expect("Failed to clear output folder: {}");
+    // Clear the output folder
+    clear_output_folder().map_err(|e| format!("Failed to clear output folder: {}", e))?;
     fs::create_dir_all(&output_dir).map_err(|e| format!("Failed to create output dir: {}", e))?;
 
+    // Read all files in the input directory
     let input_files: Vec<PathBuf> = fs::read_dir(&input_dir)
         .map_err(|e| format!("Failed to read input dir: {}", e))?
         .filter_map(|res| res.ok())
         .map(|entry| entry.path())
-        .filter(|p| p.is_file() && is_jpeg_compatible(p))
+        .filter(|p| p.is_file())
         .collect();
 
+    // Process each file
     let results: Vec<CompressionResult> = input_files
         .par_iter()
-        .filter_map(|input| compress_image_lossy(input, &output_dir).ok())
+        .filter_map(|input| {
+            if is_lossless_compatible(&input) {
+                compress_image_lossless(&input, &output_dir).ok()
+            } else {
+                compress_image_lossy(&input, &output_dir).ok()
+            }
+        })
         .collect();
 
     println!("Compression completed. {} files processed.", results.len());
@@ -44,52 +46,38 @@ pub fn lossy_compression() -> Result<Vec<CompressionResult>, String> {
     Ok(results)
 }
 
-fn is_jpeg_compatible(path: &PathBuf) -> bool {
+fn is_lossless_compatible(path: &PathBuf) -> bool {
     match path.extension().and_then(|s| s.to_str()) {
-        Some(ext) => matches!(ext.to_lowercase().as_str(), "jpg" | "jpeg" | "png"),
+        Some(ext) => matches!(ext.to_lowercase().as_str(), "png" | "webp"),
         None => false,
     }
 }
 
-pub fn compress_image_lossy(
+fn compress_image_lossless(
     input_path: &PathBuf,
     output_dir: &PathBuf,
 ) -> Result<CompressionResult, String> {
-    let img = image::open(&input_path).map_err(|e| format!("Image open failed: {}", e))?;
-    let image_data = img.to_rgb8();
-
-    let mut comp = Compress::new(ColorSpace::JCS_RGB);
-    comp.set_quality(75.0);
-    comp.set_progressive_mode();
-
-    let (w, h) = img.dimensions();
-    comp.set_size(w as usize, h as usize);
-
-    let mut compressed_bytes = Vec::new();
-    let mut comp_writer = comp
-        .start_compress(&mut compressed_bytes)
-        .map_err(|e| format!("Start compress failed: {}", e))?;
-
-    comp_writer
-        .write_scanlines(image_data.as_flat_samples().as_slice())
-        .map_err(|e| format!("Write scanlines failed: {}", e))?;
-
-    comp_writer
-        .finish()
-        .map_err(|e| format!("Finish compress failed: {}", e))?;
-
     let file_stem = input_path.file_stem().unwrap().to_string_lossy();
     //let ext = input_path.extension().unwrap_or_default().to_string_lossy();
-    let ext = "jpg"; // Assuming JPEG for compression, adjust as needed
+    let ext = "png"; // Assuming PNG for compression, adjust as needed
     let initial_path = output_dir.join(format!("{}_compressed.{}", file_stem, ext));
-
     let output_path = deduplicate_path(&initial_path);
-    fs::write(&output_path, &compressed_bytes)
-        .map_err(|e| format!("Write output failed: {}", e))?;
+
+    // Copy the file first, then optimize in place
+    fs::copy(&input_path, &output_path).map_err(|e| format!("Failed to copy PNG: {}", e))?;
+
+    let mut options = Options::max_compression();
+    options.strip = oxipng::StripChunks::Safe; // Strip metadata?
+
+    // Optimize in place using the copied file
+    let input_file = InFile::Path(output_path.clone());
+    let output_file = OutFile::from_path(output_path.clone());
+
+    optimize(&input_file, &output_file, &options)
+        .map_err(|e| format!("Failed to optimize PNG: {}", e))?;
 
     let original_size = fs::metadata(&input_path).map(|m| m.len()).unwrap_or(0);
-    let compressed_size = compressed_bytes.len() as u64;
-
+    let compressed_size = fs::metadata(&output_path).map(|m| m.len()).unwrap_or(0);
     let reduction_percent = if original_size > 0 && compressed_size <= original_size {
         100.0 * (original_size - compressed_size) as f32 / original_size as f32
     } else if original_size > 0 && compressed_size > original_size {

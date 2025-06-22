@@ -38,7 +38,7 @@ function App() {
 
   async function handleImageUpload(_images: File[]) {
     // send as base64 with filenames
-    if (_images && _images.length > 0) {
+    if (imagesDropped && _images && _images.length > 0) {
       setCompressing(true);
       try {
         const imageDataArray = await Promise.all(
@@ -80,6 +80,8 @@ function App() {
       }
     } else {
       console.error("No images selected ", images);
+      alert("Please upload some images first.");
+      setCompressing(false);
     }
   }
 
@@ -205,6 +207,22 @@ function App() {
             className="lossy-compression-button"
           >
             run lossy
+          </button>
+
+          <button
+            type="button"
+            onClick={() => invoke("lossless_compression")}
+            className="lossless-compression-button"
+          >
+            run lossless
+          </button>
+
+          <button
+            type="button"
+            onClick={() => invoke("webp_compression", { lossless: true, quality: 80.0 })}
+            className="lossless-compression-button"
+          >
+            run webp compression
           </button>
 
           <br />

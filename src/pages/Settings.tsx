@@ -1,20 +1,38 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../components/ResultsPage.css"; // Reuse existing styles
+import { invoke } from "@tauri-apps/api/core";
+
+// Define the settings interface to match the Rust enum
+interface AppSettings {
+  compression_quality: number;
+  method: "lossy" | "lossless" | "webp_lossy" | "webp_lossless";
+}
+
+const defaultSettings: AppSettings = {
+  compression_quality: 75,
+  method: "webp_lossy",
+};
 
 interface SettingsPageProps {
   onBackToMain: () => void;
 }
 
 const SettingsPage: React.FC<SettingsPageProps> = ({ onBackToMain }) => {
-  const [compressionQuality, setCompressionQuality] = useState(80);
   const [threadCount, setThreadCount] = useState(4);
-  const [outputFormat, setOutputFormat] = useState("jpg");
+  const [settings, setSettings] = useState<AppSettings>(defaultSettings);
 
-  const handleSaveSettings = () => {
-    // TODO: Implement settings saving via Tauri commands
-    console.log("Settings saved:", { compressionQuality, threadCount, outputFormat });
-    alert("Settings saved successfully!");
-  };
+  useEffect(() => {
+    invoke<AppSettings>("load_settings")
+      .then((loadedSettings) => setSettings(loadedSettings))
+      .catch(() => setSettings(defaultSettings));
+  }, []);
+
+  const save = () => {
+    invoke("save_settings", { settings }).then(() => {
+      alert("Settings saved");
+    });
+  }
+
 
   return (
     <div className="results-page">
@@ -24,7 +42,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBackToMain }) => {
         </button>
         <h1>Compression Settings</h1>
       </div>
-      
+
       <div className="settings-content">
         <div className="setting-group">
           <label htmlFor="quality">Compression Quality (%)</label>
@@ -33,11 +51,36 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBackToMain }) => {
             type="range"
             min="10"
             max="100"
-            value={compressionQuality}
-            onChange={(e) => setCompressionQuality(Number(e.target.value))}
+            value={settings.compression_quality}
+            onChange={(e) => setSettings({
+              ...settings,
+              compression_quality: Number(e.target.value)
+            })}
           />
-          <span className="setting-value">{compressionQuality}%</span>
-          <small>Higher values preserve more detail but result in larger files</small>
+          <span className="setting-value">{settings.compression_quality}%</span>
+          <small>
+            Higher values preserve more detail but result in larger files
+          </small>
+        </div>
+
+        <div className="setting-group">
+          <label htmlFor="method">Compression Method</label>
+          <select
+            id="method"
+            value={settings.method}
+            onChange={(e) => setSettings({
+              ...settings,
+              method: e.target.value as AppSettings["method"]
+            })}
+          >
+            <option value="lossy">Lossy (JPEG)</option>
+            <option value="lossless">Lossless (PNG)</option>
+            <option value="webp_lossy">WebP Lossy</option>
+            <option value="webp_lossless">WebP Lossless</option>
+          </select>
+          <small>
+            Choose compression method: Lossy for smaller files, Lossless for perfect quality
+          </small>
         </div>
 
         <div className="setting-group">
@@ -54,21 +97,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBackToMain }) => {
           <small>More threads can speed up compression but use more CPU</small>
         </div>
 
-        <div className="setting-group">
-          <label htmlFor="format">Output Format</label>
-          <select
-            id="format"
-            value={outputFormat}
-            onChange={(e) => setOutputFormat(e.target.value)}
-          >
-            <option value="jpg">JPEG</option>
-            <option value="png">PNG</option>
-            <option value="webp">WebP</option>
-          </select>
-          <small>JPEG is best for photos, PNG for graphics with transparency</small>
-        </div>
-
-        <button onClick={handleSaveSettings} className="save-button">
+        <button onClick={save} className="save-button">
           Save Settings
         </button>
       </div>
@@ -76,10 +105,26 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBackToMain }) => {
       <div className="settings-info">
         <h3>About Image Compression</h3>
         <ul>
-          <li><strong>Quality:</strong> Controls the balance between file size and image quality</li>
-          <li><strong>Threads:</strong> Number of parallel processing threads for faster compression</li>
-          <li><strong>Format:</strong> Output image format - JPEG for photos, PNG for graphics</li>
-          <li><strong>WebP:</strong> Modern format with better compression than JPEG/PNG</li>
+          <li>
+            <strong>Quality:</strong> Controls the balance between file size and
+            image quality
+          </li>
+          <li>
+            <strong>Lossy:</strong> JPEG compression - smaller files, some quality loss
+          </li>
+          <li>
+            <strong>Lossless:</strong> PNG compression - perfect quality, larger files
+          </li>
+          <li>
+            <strong>WebP Lossy:</strong> Modern format with better compression than JPEG
+          </li>
+          <li>
+            <strong>WebP Lossless:</strong> Modern format with better compression than PNG
+          </li>
+          <li>
+            <strong>Threads:</strong> Number of parallel processing threads for
+            faster compression
+          </li>
         </ul>
       </div>
     </div>

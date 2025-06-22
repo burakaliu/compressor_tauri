@@ -2,10 +2,13 @@ use base64::prelude::*;
 use std::fs;
 use std::io::Read;
 use tauri::Manager;
+use utility::load_settings;
 
 mod compressor;
 mod utility;
 mod lossy_compressor;
+mod lossless_compressor;
+mod webp_compressor;
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -101,9 +104,8 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
             let app_data = app.path().app_data_dir().unwrap();
-            crate::utility::initialize_image_paths(app_data)?;
-            println!("Input path: {:?}", crate::utility::get_input_path());
-            println!("Output path: {:?}", crate::utility::get_output_path());
+            crate::utility::initialize_image_paths(app_data.clone())?;
+            crate::utility::initialize_settings_path(app_data.clone())?;
 
             Ok(())
         })
@@ -114,9 +116,14 @@ pub fn run() {
             get_compressed_images,
             export_compressed_images,
             get_original_images,
+            utility::save_settings,
+            utility::load_settings,
+            utility::handle_compression,
+            utility::handle_images,
+            webp_compressor::webp_compression,
             lossy_compressor::lossy_compression,
+            lossless_compressor::lossless_compression,
             compressor::compress,
-            compressor::handle_images,
             compressor::get_image_metadata,
             compressor::get_compression_diagnostics
         ])

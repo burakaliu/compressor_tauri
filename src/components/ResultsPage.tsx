@@ -89,22 +89,22 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ onBackToMain }) => {
     try {
       setLoading(true);
       
-      // Get metadata, original images, compressed images, and diagnostics
-      const [metadata, original, compressed, diag] = await Promise.all([
-        invoke<ImageMetadata[]>('get_image_metadata'),
-        invoke<string[]>('get_original_images'),
-        invoke<string[]>('get_compressed_images'),
-        invoke<string>('get_compression_diagnostics')
-      ]);
+      // // Get metadata, original images, compressed images, and diagnostics
+      // const [metadata, original, compressed, diag] = await Promise.all([
+      //   //invoke<ImageMetadata[]>('get_image_metadata'),
+      //   //invoke<string[]>('get_original_images'),
+      //   //invoke<string[]>('get_compressed_images'),
+      //   //invoke<string>('get_compression_diagnostics')
+      // ]);
 
-      setImageMetadata(metadata);
-      setOriginalImages(original);
-      setCompressedImages(compressed);
-      setDiagnostics(diag);
+      // //setImageMetadata(metadata);
+      // //setOriginalImages(original);
+      // //setCompressedImages(compressed);
+      // //setDiagnostics(diag);
       
-      if (metadata.length > 0) {
-        setSelectedImage(metadata[0]);
-      }
+      // if (metadata.length > 0) {
+      //   setSelectedImage(metadata[0]);
+      // }
     } catch (error) {
       console.error('Failed to load images:', error);
     } finally {

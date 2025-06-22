@@ -31,7 +31,7 @@ pub struct ImageMetadata {
 }
 
 #[tauri::command]
-pub fn handle_images(images: Vec<ImageData>) -> Result<(), String> {
+fn handle_images(images: Vec<ImageData>) -> Result<(), String> {
     // Get the global input path
     let source = get_input_path();
 
@@ -112,6 +112,8 @@ pub fn handle_images(images: Vec<ImageData>) -> Result<(), String> {
 
 #[tauri::command]
 pub fn compress() {
+
+    println!("compress function called from compressor.rs");
     let source = get_input_path().clone();
     let dest = get_output_path().clone();
 
@@ -180,6 +182,7 @@ pub fn get_image_metadata() -> Result<Vec<ImageMetadata>, String> {
 
 #[tauri::command]
 pub fn get_compression_diagnostics() -> Result<String, String> {
+    println!("get_compression_diagnostics function called from compressor.rs");
     let (input_count, output_count) = get_compression_statistics()?;
     Ok(analyze_compression_results(input_count, output_count))
 }
