@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "../components/ResultsPage.css"; // Reuse existing styles
 import { invoke } from "@tauri-apps/api/core";
+import "./SettingsPage.css"; // Create a new CSS file for settings styles
+import { TooltipInfo } from "../components/TooltipInfo";
 
 // Define the settings interface to match the Rust enum
 interface AppSettings {
@@ -75,26 +77,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBackToMain }) => {
           >
             <option value="lossy">Lossy (JPEG)</option>
             <option value="lossless">Lossless (PNG)</option>
-            <option value="webp_lossy">WebP Lossy</option>
+            <option value="webp_lossy">WebP Lossy (reccomended)</option>
             <option value="webp_lossless">WebP Lossless</option>
           </select>
           <small>
             Choose compression method: Lossy for smaller files, Lossless for perfect quality
           </small>
-        </div>
-
-        <div className="setting-group">
-          <label htmlFor="threads">Thread Count</label>
-          <input
-            id="threads"
-            type="range"
-            min="1"
-            max="8"
-            value={threadCount}
-            onChange={(e) => setThreadCount(Number(e.target.value))}
-          />
-          <span className="setting-value">{threadCount}</span>
-          <small>More threads can speed up compression but use more CPU</small>
         </div>
 
         <button onClick={save} className="save-button">
@@ -107,23 +95,19 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBackToMain }) => {
         <ul>
           <li>
             <strong>Quality:</strong> Controls the balance between file size and
-            image quality
+            image quality (applies to lossy methods)
           </li>
           <li>
-            <strong>Lossy:</strong> JPEG compression - smaller files, some quality loss
+            <strong>Lossy (JPEG):</strong> Smaller file sizes with some quality loss. Best for photos.
           </li>
           <li>
-            <strong>Lossless:</strong> PNG compression - perfect quality, larger files
+            <strong>Lossless (PNG):</strong> No quality loss. Best for graphics and transparency, but larger files.
           </li>
           <li>
-            <strong>WebP Lossy:</strong> Modern format with better compression than JPEG
+            <strong>WebP Lossy:</strong> Modern format with better compression than JPEG. Supports transparency.
           </li>
           <li>
-            <strong>WebP Lossless:</strong> Modern format with better compression than PNG
-          </li>
-          <li>
-            <strong>Threads:</strong> Number of parallel processing threads for
-            faster compression
+            <strong>WebP Lossless:</strong> Modern format with better compression than PNG but larger than lossy WebP.
           </li>
         </ul>
       </div>

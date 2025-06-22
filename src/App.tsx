@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import { MyDropzone } from "./components/dropzone";
 import { open } from "@tauri-apps/plugin-dialog";
-import ResultsPage from "./components/ResultsPage";
+import ResultsPage from "./pages/ResultsPage";
 import SettingsPage from "./pages/Settings";
 
 function App() {
