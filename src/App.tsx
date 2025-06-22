@@ -5,25 +5,17 @@ import { MyDropzone } from "./components/dropzone";
 import { open } from "@tauri-apps/plugin-dialog";
 import ResultsPage from "./pages/ResultsPage";
 import SettingsPage from "./pages/Settings";
+import { Button } from "./components/ui/button";
+import { Card } from "./components/ui/card";
+import { Settings, FileImage, Download, Eye } from "lucide-react";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
   const [images, setImages] = useState<File[] | undefined>();
-  const [currentPage, setCurrentPage] = useState<"main" | "results" | "settings">("main");
+  const [currentPage, setCurrentPage] = useState<
+    "main" | "results" | "settings"
+  >("main");
   const [imagesDropped, setImagesDropped] = useState(false);
   const [compressing, setCompressing] = useState(false);
-  const [results, setResults] = useState<any>([]);
-
-
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
-
-  useEffect(() => {
-    // Remove this useEffect since we handle images in ResultsPage
-  }, []);
 
   async function handleImageDrop(files: File[]) {
     console.log("Files dropped:", files);
@@ -62,10 +54,12 @@ function App() {
             );
           })
         );
-        
-        console.log(`Starting compression of ${imageDataArray.length} images...`);
+
+        console.log(
+          `Starting compression of ${imageDataArray.length} images...`
+        );
         await invoke("handle_images", { images: imageDataArray });
-        
+
         imagesDropped && setImagesDropped(false); // Reset images dropped state
         // Navigate to results page after compression
         setCurrentPage("results");
@@ -97,150 +91,158 @@ function App() {
     setImagesDropped(false);
   }
 
-  const runCompression = async () => {
-    setCompressing(true);
-    console.log("Running parallel compression...");
+  useEffect(() => {
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+    };
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+    };
 
-    try {
-      const res = await invoke("parallel_compress");
-      setResults(res);
-      setCurrentPage("results");
-    } catch (error) {
-      console.error("Parallel compression failed", error);
-      alert(`Compression error: ${error}. Check results page for details.`);
-      setCurrentPage("results");
-    } finally {
-      setCompressing(false);
-    }
-  };
+    window.addEventListener("dragover", handleDragOver);
+    window.addEventListener("drop", handleDrop);
+
+    console.log("Drag and drop listeners added");
+
+    //log to console when something is dropped
+    window.addEventListener("drop", (e) => {
+      if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+        console.log("Files dropped:", e.dataTransfer.files);
+      }
+    });
+
+    //log to console when something is dragged over
+    window.addEventListener("dragover", (e) => {
+      console.log("Drag over event detected");
+    });
+
+    return () => {
+      window.removeEventListener("dragover", handleDragOver);
+      window.removeEventListener("drop", handleDrop);
+    };
+  }, []);
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       {currentPage === "main" ? (
-        <main className="container">
-          <div className="header">
-            <button
-              onClick={() => setCurrentPage("results")}
-              className="view-results-button"
-            >
-              View Results
-            </button>
-            <button
-              onClick={() => setCurrentPage("settings")}
-              className="settings-button"
-            >
-              Settings
-            </button>
-          </div>
-          <h1>Welcome to image Compressor</h1>
-
-          <form
-            className="row"
-            onSubmit={(e) => {
-              e.preventDefault();
-              greet();
-            }}
-          >
-            <input
-              id="greet-input"
-              onChange={(e) => setName(e.currentTarget.value)}
-              placeholder="Enter a name..."
-            />
-            <button type="submit">Greet</button>
-          </form>
-          <p>{greetMsg}</p>
-
-          {imagesDropped ? (
-            <div className="images-dropped">
-              <p>Images ready for compression: {images?.length}</p>
-              <ul className="image-list">
-                {images?.map((file, index) => {
-                  const imageUrl = URL.createObjectURL(file);
-                  return (
-                    <div key={index} className="image-card">
-                      <li className="before-img-name">{file.name}</li>
-                      <img
-                        src={imageUrl}
-                        alt={file.name}
-                        className="before-img"
-                      />
-                    </div>
-                  );
-                })}
-              </ul>
-              <button
-                type="button"
-                onClick={() => resetImages()}
-                className="reset-images-button"
+        <main className="container mx-auto px-4 py-8 max-w-4xl">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center space-x-2">
+              <FileImage className="h-6 w-6 text-primary" />
+              <h1 className="text-2xl font-bold text-foreground">
+                Image Compressor
+              </h1>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage("results")}
+                className="flex items-center gap-2"
               >
-                <span className="reset-images">Reset Images</span>
-              </button>
+                <Eye className="h-4 w-4" />
+                Results
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage("settings")}
+                className="flex items-center gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </Button>
             </div>
-          ) : (
-            <MyDropzone onImageUpload={handleImageDrop} />
-          )}
+          </div>
 
-          <br />
+          {/* Main Content */}
+          <div className="space-y-6">
+            {imagesDropped ? (
+              <Card className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold">
+                      Ready for Compression
+                    </h2>
+                    <span className="text-sm text-muted-foreground">
+                      {images?.length} image{images?.length !== 1 ? "s" : ""}{" "}
+                      selected
+                    </span>
+                  </div>
 
-          {compressing ? (
-            <div className="loading-overlay">
-              <p>Compressing images... please wait</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {images?.map((file, index) => {
+                      const imageUrl = URL.createObjectURL(file);
+                      return (
+                        <div
+                          key={index}
+                          className="border rounded-lg p-3 space-y-2"
+                        >
+                          <img
+                            src={imageUrl}
+                            alt={file.name}
+                            className="w-full h-32 object-cover rounded"
+                          />
+                          <p className="text-sm text-muted-foreground truncate">
+                            {file.name}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleImageUpload(images || [])}
+                      disabled={compressing}
+                      className="flex-1"
+                    >
+                      {compressing ? "Compressing..." : "Start Compression"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => resetImages()}
+                      disabled={compressing}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ) : (
+              <MyDropzone onImageUpload={handleImageDrop} />
+            )}
+
+            {/* Loading Overlay */}
+            {compressing && (
+              <Card className="p-6">
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  <p className="text-muted-foreground">
+                    Compressing images... please wait
+                  </p>
+                </div>
+              </Card>
+            )}
+
+            {/* Export Button */}
+            <div className="flex justify-center">
+              <Button
+                variant="outline"
+                onClick={handleExport}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export Compressed Images
+              </Button>
             </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => handleImageUpload(images || [])}
-            >
-              Click to run compressor
-            </button>
-          )}
-
-          <button type="button" onClick={runCompression}>
-            Run Parallel Compression
-          </button>
-          
-          <br />
-
-          <button
-            type="button"
-            onClick={() => invoke("lossy_compression")}
-            className="lossy-compression-button"
-          >
-            run lossy
-          </button>
-
-          <button
-            type="button"
-            onClick={() => invoke("lossless_compression")}
-            className="lossless-compression-button"
-          >
-            run lossless
-          </button>
-
-          <button
-            type="button"
-            onClick={() => invoke("webp_compression", { lossless: true, quality: 80.0 })}
-            className="lossless-compression-button"
-          >
-            run webp compression
-          </button>
-
-          <br />
-
-          <button type="button" onClick={handleExport}>
-            Export Compressed Images
-          </button>
-
-          <button type="button" onClick={() => setCurrentPage("results")}>
-            View Results
-          </button>
+          </div>
         </main>
       ) : currentPage === "results" ? (
         <ResultsPage onBackToMain={() => setCurrentPage("main")} />
       ) : (
         <SettingsPage onBackToMain={() => setCurrentPage("main")} />
       )}
-    </>
+    </div>
   );
 }
 

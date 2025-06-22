@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import "../components/ResultsPage.css"; // Reuse existing styles
 import { invoke } from "@tauri-apps/api/core";
-import "./SettingsPage.css"; // Create a new CSS file for settings styles
-import { TooltipInfo } from "../components/TooltipInfo";
+import { Button } from "../components/ui/button";
+import { Card } from "../components/ui/card";
+import { Label } from "../components/ui/label";
+import { Select } from "../components/ui/select";
+import { ArrowLeft, Settings as SettingsIcon, Info } from "lucide-react";
 
 // Define the settings interface to match the Rust enum
 interface AppSettings {
@@ -20,7 +22,6 @@ interface SettingsPageProps {
 }
 
 const SettingsPage: React.FC<SettingsPageProps> = ({ onBackToMain }) => {
-  const [threadCount, setThreadCount] = useState(4);
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
 
   useEffect(() => {
@@ -35,81 +36,126 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBackToMain }) => {
     });
   }
 
-
   return (
-    <div className="results-page">
-      <div className="header">
-        <button onClick={onBackToMain} className="back-button">
-          ← Back to Main
-        </button>
-        <h1>Compression Settings</h1>
-      </div>
-
-      <div className="settings-content">
-        <div className="setting-group">
-          <label htmlFor="quality">Compression Quality (%)</label>
-          <input
-            id="quality"
-            type="range"
-            min="10"
-            max="100"
-            value={settings.compression_quality}
-            onChange={(e) => setSettings({
-              ...settings,
-              compression_quality: Number(e.target.value)
-            })}
-          />
-          <span className="setting-value">{settings.compression_quality}%</span>
-          <small>
-            Higher values preserve more detail but result in larger files
-          </small>
-        </div>
-
-        <div className="setting-group">
-          <label htmlFor="method">Compression Method</label>
-          <select
-            id="method"
-            value={settings.method}
-            onChange={(e) => setSettings({
-              ...settings,
-              method: e.target.value as AppSettings["method"]
-            })}
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <Button
+            variant="outline"
+            onClick={onBackToMain}
+            className="flex items-center gap-2"
           >
-            <option value="lossy">Lossy (JPEG)</option>
-            <option value="lossless">Lossless (PNG)</option>
-            <option value="webp_lossy">WebP Lossy (reccomended)</option>
-            <option value="webp_lossless">WebP Lossless</option>
-          </select>
-          <small>
-            Choose compression method: Lossy for smaller files, Lossless for perfect quality
-          </small>
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <div className="flex items-center gap-2">
+            <SettingsIcon className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">Compression Settings</h1>
+          </div>
         </div>
 
-        <button onClick={save} className="save-button">
-          Save Settings
-        </button>
-      </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Settings Form */}
+          <div className="lg:col-span-2">
+            <Card className="p-6">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="quality" className="text-base font-medium">
+                    Compression Quality
+                  </Label>
+                  <div className="space-y-2">
+                    <input
+                      id="quality"
+                      type="range"
+                      min="10"
+                      max="100"
+                      value={settings.compression_quality}
+                      onChange={(e) => setSettings({
+                        ...settings,
+                        compression_quality: Number(e.target.value)
+                      })}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 slider"
+                    />
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>Lower quality (smaller files)</span>
+                      <span className="font-medium">{settings.compression_quality}%</span>
+                      <span>Higher quality (larger files)</span>
+                    </div>
+                  </div>
+                </div>
 
-      <div className="settings-info">
-        <h3>About Image Compression</h3>
-        <ul>
-          <li>
-            <strong>Quality:</strong> Controls the balance between file size and
-            image quality (applies to lossy methods)
-          </li>
-          <li>
-            <strong>Lossy (JPEG):</strong> Smaller file sizes with some quality loss. Best for photos.
-          </li>
-          <li>
-            <strong>Lossless (PNG):</strong> No quality loss. Best for graphics and transparency, but larger files.
-          </li>
-          <li>
-            <strong>WebP Lossy:</strong> Modern format with better compression than JPEG. Supports transparency.
-          </li>
-          <li>
-            <strong>WebP Lossless:</strong> Modern format with better compression than PNG but larger than lossy WebP.
-          </li>
-        </ul>
+                <div className="space-y-2">
+                  <Label htmlFor="method" className="text-base font-medium">
+                    Compression Method
+                  </Label>
+                  <select
+                    id="method"
+                    value={settings.method}
+                    onChange={(e) => setSettings({
+                      ...settings,
+                      method: e.target.value as AppSettings["method"]
+                    })}
+                    className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  >
+                    <option value="lossy">Lossy (JPEG)</option>
+                    <option value="lossless">Lossless (PNG)</option>
+                    <option value="webp_lossy">WebP Lossy (recommended)</option>
+                    <option value="webp_lossless">WebP Lossless</option>
+                  </select>
+                </div>
+
+                <Button onClick={save} className="w-full">
+                  Save Settings
+                </Button>
+              </div>
+            </Card>
+          </div>
+
+          {/* Information Panel */}
+          <div className="lg:col-span-1">
+            <Card className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Info className="h-5 w-5 text-primary" />
+                  <h3 className="text-lg font-medium">About Compression</h3>
+                </div>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <strong className="text-foreground">Quality:</strong>
+                    <p className="text-muted-foreground">
+                      Controls the balance between file size and image quality (applies to lossy methods)
+                    </p>
+                  </div>
+                  <div>
+                    <strong className="text-foreground">Lossy (JPEG):</strong>
+                    <p className="text-muted-foreground">
+                      Smaller file sizes with some quality loss. Best for photos.
+                    </p>
+                  </div>
+                  <div>
+                    <strong className="text-foreground">Lossless (PNG):</strong>
+                    <p className="text-muted-foreground">
+                      No quality loss. Best for graphics and transparency, but larger files.
+                    </p>
+                  </div>
+                  <div>
+                    <strong className="text-foreground">WebP Lossy:</strong>
+                    <p className="text-muted-foreground">
+                      Modern format with better compression than JPEG. Supports transparency.
+                    </p>
+                  </div>
+                  <div>
+                    <strong className="text-foreground">WebP Lossless:</strong>
+                    <p className="text-muted-foreground">
+                      Modern format with better compression than PNG but larger than lossy WebP.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

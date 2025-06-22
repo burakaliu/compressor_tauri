@@ -16,3 +16,7 @@
   border-color: #396cd8;
   background-color: #f0f8ff;
 }
+
+* {
+  outline: 1px solid red !important; /* visualize layout */
+}
