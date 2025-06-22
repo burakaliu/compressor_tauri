@@ -3,19 +3,24 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 use base64::prelude::*;
+use rayon::result;
 use serde::{Serialize, Deserialize};
 use crate::webp_compressor::webp_compression;
 use crate::lossy_compressor::lossy_compression;
 use crate::lossless_compressor::lossless_compression;
+use base64::{engine::general_purpose, Engine as _};
 
 
-#[derive(serde::Serialize)]
+
+#[derive(serde::Serialize, Debug)]
 pub struct CompressionResult {
     pub(crate) original_path: String,
     pub compressed_path: String,
     pub original_size: u64,
     pub compressed_size: u64,
     pub reduction_percent: f32,
+    pub original_base64: String,
+    pub compressed_base64: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -209,32 +214,37 @@ pub fn save_settings(settings: AppSettings) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn handle_compression() -> Result<(), String> {
+pub async fn handle_compression() -> Result<(Vec<CompressionResult>), String> {
     let settings = load_settings().unwrap_or_default();
+    let mut results: Vec<CompressionResult> = Vec::new();
 
     if settings.method ==  CompressionMethod::WebpLossy || settings.method == CompressionMethod::WebpLossless {
         // run WebP compression
         println!("Running WebP compression with quality: {} and method: {}", settings.compression_quality, settings.method.as_str());
         if CompressionMethod::WebpLossy == settings.method {
-            //webp_compression(settings.method == CompressionMethod::WebpLossy, settings.compression_quality).expect("WebP compression failed");
+            results = webp_compression(settings.method == CompressionMethod::WebpLossy, settings.compression_quality).expect("WebP compression failed");
             println!("Running lossy WebP compression");
         } else if CompressionMethod::WebpLossless == settings.method {
-            //webp_compression(settings.method == CompressionMethod::WebpLossless, settings.compression_quality).expect("WebP compression failed");
+            results = webp_compression(settings.method == CompressionMethod::WebpLossless, settings.compression_quality).expect("WebP compression failed");
             println!("Running lossless WebP compression");
         }
         //webp_compression(settings.method == CompressionMethod::WebpLossless, settings.compression_quality).expect("WebP compression failed");
     } else if settings.method == CompressionMethod::Lossy {
         // run JPEG compression
         println!("Running lossy compression with quality: {}", settings.compression_quality);
-        //lossy_compression().expect("Lossy compression failed");
+        results = lossy_compression().expect("Lossy compression failed");
     } else if settings.method == CompressionMethod::Lossless {
         // run PNG compression
         println!("Running lossless compression");
-        //lossless_compression().expect("Lossless compression failed");
+        results = lossless_compression().expect("Lossless compression failed");
     } else {
         println!("Error: Unknown compression method");    
     }
-    Ok(())
+    println!("Compression completed. Here are the results: {:?}", results);
+    if results.is_empty() {
+        return Err("No images were processed".to_string());
+    }
+    Ok(results)
 }
 
 
@@ -248,7 +258,7 @@ pub struct ImageData {
 }
 
 #[tauri::command]
-pub async fn handle_images(images: Vec<ImageData>) -> Result<(), String> {
+pub async fn handle_images(images: Vec<ImageData>) -> Result<(Vec<CompressionResult>), String> {
 
     println!("handle_images function called with {} images", images.len());
     // Get the global input path
@@ -295,10 +305,10 @@ pub async fn handle_images(images: Vec<ImageData>) -> Result<(), String> {
 
     //compress images
     println!("Starting compression process... (handle_compression is called)");
-    let _ = handle_compression().await;
+    let results = handle_compression().await.unwrap();
     //crate::parallel_compressor::parallel_compress();
 
-    Ok(())
+    Ok(results)
 }
 
 fn validate_image_data(data: &[u8], filename: &str) -> Result<(), String> {
@@ -330,4 +340,9 @@ fn validate_image_data(data: &[u8], filename: &str) -> Result<(), String> {
     }
     
     Ok(())
+}
+
+pub fn encode_file(path: &str) -> Result<String, String> {
+    let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
+    Ok(general_purpose::STANDARD.encode(&bytes))
 }

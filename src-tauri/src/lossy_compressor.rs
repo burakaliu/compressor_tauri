@@ -10,7 +10,7 @@ use std::{
 };
 
 use crate::utility::{
-    clear_output_folder, deduplicate_path, get_input_path, get_output_path, CompressionResult,
+    clear_output_folder, deduplicate_path, get_input_path, get_output_path, CompressionResult, encode_file
 };
 
 #[tauri::command]
@@ -114,5 +114,7 @@ pub fn compress_image_lossy(
         original_size,
         compressed_size,
         reduction_percent,
+        original_base64: encode_file(&input_path.to_string_lossy())?,
+        compressed_base64: encode_file(&output_path.to_string_lossy())?,
     })
 }

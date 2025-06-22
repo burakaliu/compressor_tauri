@@ -1,12 +1,12 @@
 use crate::lossy_compressor::compress_image_lossy;
 use crate::utility::{
-    clear_output_folder, deduplicate_path, get_input_path, get_output_path, CompressionResult,
+    clear_output_folder, deduplicate_path, encode_file, get_input_path, get_output_path,
+    CompressionResult,
 };
 use oxipng::{optimize, InFile, Options, OutFile};
+use rayon::prelude::*;
 use std::fs;
 use std::path::PathBuf;
-use rayon::prelude::*;
-
 
 #[tauri::command]
 pub fn lossless_compression() -> Result<Vec<CompressionResult>, String> {
@@ -102,5 +102,7 @@ fn compress_image_lossless(
         original_size,
         compressed_size,
         reduction_percent,
+        original_base64: encode_file(&input_path.to_string_lossy())?,
+        compressed_base64: encode_file(&output_path.to_string_lossy())?,
     })
 }

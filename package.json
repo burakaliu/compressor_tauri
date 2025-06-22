@@ -10,21 +10,25 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@radix-ui/react-slider": "^1.3.5",
     "@radix-ui/react-slot": "^1.2.3",
     "@tailwindcss/vite": "^4.1.10",
-    "@tauri-apps/api": "^2.5.0",
     "@tauri-apps/plugin-dialog": "^2.2.2",
     "@tauri-apps/plugin-opener": "^2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.522.0",
+    "next-themes": "^0.4.6",
     "react": "^18.3.1",
+    "react-compare-slider": "^3.1.0",
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.3.8",
+    "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.10"
   },
   "devDependencies": {
+    "@tauri-apps/api": "^2.5.0",
     "@tauri-apps/cli": "^2",
     "@tauri-apps/plugin-fs": "^2.3.0",
     "@types/node": "^24.0.3",

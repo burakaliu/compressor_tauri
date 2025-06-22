@@ -1,19 +1,17 @@
-
-use crate::utility::{
-    clear_output_folder, deduplicate_path, get_input_path, get_output_path, CompressionResult, is_jpeg
-};
 use crate::lossy_compressor::compress_image_lossy;
+use crate::utility::{
+    clear_output_folder, deduplicate_path, get_input_path, get_output_path, is_jpeg,
+    CompressionResult, encode_file,
+};
+use image::GenericImageView;
+use image::ImageReader;
+use rayon::prelude::*;
 use std::fs;
 use std::path::{Path, PathBuf};
-use image::ImageReader;
-use image::GenericImageView;
 use webp::Encoder;
-use rayon::prelude::*;
-
 
 #[tauri::command]
 pub fn webp_compression(lossless: bool, quality: f32) -> Result<Vec<CompressionResult>, String> {
-
     println!("WebP compression function called.");
 
     let input_dir = get_input_path();
@@ -32,22 +30,28 @@ pub fn webp_compression(lossless: bool, quality: f32) -> Result<Vec<CompressionR
     let results: Vec<CompressionResult> = input_files
         .par_iter()
         .filter_map(|input| {
-            if (is_jpeg(input)){
+            if (is_jpeg(input)) {
                 compress_image_lossy(input, &output_dir).ok()
             } else {
                 compress_to_webp(input, &output_dir, quality, lossless).ok()
             }
-        }
-    )
+        })
         .collect();
 
-    println!("Webp compression completed. {} files processed.", results.len());
+    println!(
+        "Webp compression completed. {} files processed.",
+        results.len()
+    );
 
     Ok(results)
 }
 
-
-pub fn compress_to_webp(input_path: &PathBuf, output_dir: &PathBuf, quality: f32, lossless: bool) -> Result<CompressionResult, String> {
+pub fn compress_to_webp(
+    input_path: &PathBuf,
+    output_dir: &PathBuf,
+    quality: f32,
+    lossless: bool,
+) -> Result<CompressionResult, String> {
     // Load the image using the image crate
     let img = ImageReader::open(input_path)
         .map_err(|e| format!("Failed to open image: {}", e))?
@@ -98,5 +102,7 @@ pub fn compress_to_webp(input_path: &PathBuf, output_dir: &PathBuf, quality: f32
         original_size,
         compressed_size,
         reduction_percent,
+        original_base64: encode_file(&input_path.to_string_lossy())?,
+        compressed_base64: encode_file(&output_path.to_string_lossy())?,
     })
 }

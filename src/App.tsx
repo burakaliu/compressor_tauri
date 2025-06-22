@@ -4,10 +4,21 @@ import "./App.css";
 import { MyDropzone } from "./components/dropzone";
 import { open } from "@tauri-apps/plugin-dialog";
 import ResultsPage from "./pages/ResultsPage";
-import SettingsPage from "./pages/Settings";
+import SettingsPage from "./pages/SettingsPage";
 import { Button } from "./components/ui/button";
 import { Card } from "./components/ui/card";
 import { Settings, FileImage, Download, Eye } from "lucide-react";
+import { handleExport } from "./lib/utils";
+
+export interface ImageMetadata {
+  original_path: string;
+  compressed_path: string;
+  original_size: number;
+  compressed_size: number;
+  reduction_percent: number;
+  original_base64: string;
+  compressed_base64: string;
+}
 
 function App() {
   const [images, setImages] = useState<File[] | undefined>();
@@ -16,6 +27,7 @@ function App() {
   >("main");
   const [imagesDropped, setImagesDropped] = useState(false);
   const [compressing, setCompressing] = useState(false);
+  const [results, setResults] = useState<ImageMetadata[]>([]);
 
   async function handleImageDrop(files: File[]) {
     console.log("Files dropped:", files);
@@ -58,7 +70,12 @@ function App() {
         console.log(
           `Starting compression of ${imageDataArray.length} images...`
         );
-        await invoke("handle_images", { images: imageDataArray });
+        const resultData: ImageMetadata[] = await invoke("handle_images", {
+          images: imageDataArray,
+        });
+        setResults(resultData);
+        console.log("Compression completed successfully", resultData);
+        console.log("Compression results:", results);
 
         imagesDropped && setImagesDropped(false); // Reset images dropped state
         // Navigate to results page after compression
@@ -79,12 +96,7 @@ function App() {
     }
   }
 
-  async function handleExport() {
-    const dir = await open({ directory: true });
-    if (dir) {
-      await invoke("export_compressed_images", { destination: dir });
-    }
-  }
+  
 
   function resetImages() {
     setImages(undefined);
@@ -123,7 +135,7 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background justify-center flex flex-col">
       {currentPage === "main" ? (
         <main className="container mx-auto px-4 py-8 max-w-4xl">
           {/* Header */}
@@ -238,7 +250,10 @@ function App() {
           </div>
         </main>
       ) : currentPage === "results" ? (
-        <ResultsPage onBackToMain={() => setCurrentPage("main")} />
+        <ResultsPage
+          results={results}
+          onBackToMain={() => setCurrentPage("main")}
+        />
       ) : (
         <SettingsPage onBackToMain={() => setCurrentPage("main")} />
       )}
