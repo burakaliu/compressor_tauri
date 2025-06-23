@@ -4,7 +4,7 @@
 ![License](https://img.shields.io/badge/license-Apache%202.0-green)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 
-**Stretta** is a simple, fast, and intuitive desktop application for compressing images while maintaining quality. Built with modern web technologies and Rust, it offers a beautiful user interface with powerful compression capabilities.
+**Stretta** is a simple, fast, private, and intuitive desktop application for compressing images. Built with Rust, Tauri, React, Vite, Tailwind, and shadcn/ui. It does everything you could want an image compressor to do. If it doesn't, let me know and I'll add whatever you want. If you find any bugs, let me know. This was just a simple side project to learn Rust but I can continue expanding it if anyone finds it useful. The rest of the readme is AI slop
 
 ## ✨ Features
 
@@ -76,21 +76,6 @@
 5. **Review results** in the Results page with before/after comparisons
 6. **Export** compressed images to your desired location
 
-## 🎨 User Interface
-
-### Main Features
-
-- **Clean, Modern Design**: Built with Tailwind CSS and Radix UI components
-- **Responsive Layout**: Adapts to different window sizes
-- **Intuitive Navigation**: Easy switching between compression, results, and settings
-- **Visual Feedback**: Loading states, progress indicators, and success notifications
-
-### Pages
-
-1. **Main Page**: Drag & drop interface for image selection and compression
-2. **Results Page**: Visual comparison of original vs compressed images with statistics
-3. **Settings Page**: Compression quality control, method selection, and theme preferences
-
 ## ⚙️ Configuration
 
 ### Compression Settings
@@ -101,27 +86,6 @@
   - `Lossless (PNG)`: PNG compression without quality loss
   - `WebP Lossy`: Modern lossy compression with better efficiency than JPEG
   - `WebP Lossless`: Modern lossless compression with better efficiency than PNG
-
-### Theme Settings
-
-- **Light Mode**: Clean, bright interface
-- **Dark Mode**: Easy on the eyes for low-light environments
-- **System**: Automatically follows your system's theme preference
-
-## 🏗️ Architecture
-
-### Frontend (React + TypeScript)
-- **React 18**: Modern React with hooks and functional components
-- **TypeScript**: Type-safe development
-- **Tailwind CSS**: Utility-first CSS framework
-- **Radix UI**: Accessible, unstyled UI components
-- **Vite**: Fast build tool and development server
-
-### Backend (Rust + Tauri)
-- **Tauri**: Secure, fast, and lightweight desktop app framework
-- **Rust**: High-performance image processing
-- **Image Compressor**: Rust library for various compression algorithms
-- **Serde**: Serialization/deserialization for data exchange
 
 ## 🛠️ Development
 
@@ -160,24 +124,3 @@ stretta-image-compressor/
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-## 👨‍💻 Author
-
-**Burak Unlu** - [burakaliunlu@gmail.com](mailto:burakaliunlu@gmail.com)
-
-## 🙏 Acknowledgments
-
-- [Tauri](https://tauri.app/) - For the excellent desktop app framework
-- [Radix UI](https://www.radix-ui.com/) - For accessible UI components
-- [Lucide](https://lucide.dev/) - For beautiful icons
-- [Tailwind CSS](https://tailwindcss.com/) - For the utility-first CSS framework
-
-## 📊 Performance
-
-- **Fast Compression**: Powered by Rust for optimal performance
-- **Low Memory Usage**: Efficient memory management
-- **Small Bundle Size**: Optimized for minimal disk space usage
-- **Native Performance**: Near-native speed with Tauri's lightweight runtime
-
----
-
-**Stretta** - Compress images beautifully, simply, and securely. 🎨✨
