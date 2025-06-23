@@ -7,7 +7,7 @@ use image::GenericImageView;
 use image::ImageReader;
 use rayon::prelude::*;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 use webp::Encoder;
 
 #[tauri::command]
@@ -30,7 +30,7 @@ pub fn webp_compression(lossless: bool, quality: f32) -> Result<Vec<CompressionR
     let results: Vec<CompressionResult> = input_files
         .par_iter()
         .filter_map(|input| {
-            if (is_jpeg(input)) {
+            if is_jpeg(input) {
                 compress_image_lossy(input, &output_dir).ok()
             } else {
                 compress_to_webp(input, &output_dir, quality, lossless).ok()

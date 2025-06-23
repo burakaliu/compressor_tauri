@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
-import { convertFileSrc } from "@tauri-apps/api/core";
 import { ImageMetadata } from "../App";
 import { handleExport } from "../lib/utils";
 
@@ -193,20 +192,22 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <div className="flex items-center gap-4 mb-8">
-            <Button
-              variant="outline"
-              onClick={onBackToMain}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-            <div className="flex items-center gap-2">
-              <BarChart3 className="h-6 w-6 text-primary" />
-              <h1 className="text-2xl font-bold text-foreground">
-                Compression Results
-              </h1>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                onClick={onBackToMain}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-6 w-6 text-primary" />
+                <h1 className="text-2xl font-bold text-foreground">
+                  Compression Results
+                </h1>
+              </div>
             </div>
           </div>
 
@@ -250,7 +251,8 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
             </div>
           </div>
           <div className="text-sm text-muted-foreground">
-            <span>{imageMetadata.length} images processed</span>
+            {imageMetadata.length} image{imageMetadata.length !== 1 ? "s" : ""}{" "}
+            processed
           </div>
         </div>
 

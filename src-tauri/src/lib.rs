@@ -2,9 +2,7 @@ use base64::prelude::*;
 use std::fs;
 use std::io::Read;
 use tauri::Manager;
-use utility::load_settings;
 
-mod compressor;
 mod utility;
 mod lossy_compressor;
 mod lossless_compressor;
@@ -122,10 +120,7 @@ pub fn run() {
             utility::handle_images,
             webp_compressor::webp_compression,
             lossy_compressor::lossy_compression,
-            lossless_compressor::lossless_compression,
-            compressor::compress,
-            compressor::get_image_metadata,
-            compressor::get_compression_diagnostics
+            lossless_compressor::lossless_compression
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

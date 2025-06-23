@@ -3,11 +3,10 @@ import { invoke } from "@tauri-apps/api/core";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Label } from "../components/ui/label";
-import { Select } from "../components/ui/select";
 import { ArrowLeft, Settings as SettingsIcon, Info } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 // Define the settings interface to match the Rust enum
 interface AppSettings {
@@ -45,21 +44,24 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBackToMain }) => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button
-            variant="outline"
-            onClick={onBackToMain}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-          <div className="flex items-center gap-2">
-            <SettingsIcon className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">
-              Compression Settings
-            </h1>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={onBackToMain}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <div className="flex items-center gap-2">
+              <SettingsIcon className="h-6 w-6 text-primary" />
+              <h1 className="text-2xl font-bold text-foreground">
+                Compression Settings
+              </h1>
+            </div>
           </div>
+          <ThemeToggle />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -119,7 +121,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ onBackToMain }) => {
                   </select>
                 </div>
 
-                <Button onClick={save} className="w-full">
+                <Button onClick={save} className="w-full dark:bg-primary dark:text-black">
                   Save Settings
                 </Button>
               </div>

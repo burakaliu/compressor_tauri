@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import { MyDropzone } from "./components/dropzone";
-import { open } from "@tauri-apps/plugin-dialog";
 import ResultsPage from "./pages/ResultsPage";
 import SettingsPage from "./pages/SettingsPage";
 import { Button } from "./components/ui/button";
@@ -116,18 +115,6 @@ function App() {
 
     console.log("Drag and drop listeners added");
 
-    //log to console when something is dropped
-    window.addEventListener("drop", (e) => {
-      if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
-        console.log("Files dropped:", e.dataTransfer.files);
-      }
-    });
-
-    //log to console when something is dragged over
-    window.addEventListener("dragover", (e) => {
-      console.log("Drag over event detected");
-    });
-
     return () => {
       window.removeEventListener("dragover", handleDragOver);
       window.removeEventListener("drop", handleDrop);
@@ -206,7 +193,7 @@ function App() {
                     <Button
                       onClick={() => handleImageUpload(images || [])}
                       disabled={compressing}
-                      className="flex-1"
+                      className="flex-1 dark:text-black"
                     >
                       {compressing ? "Compressing..." : "Start Compression"}
                     </Button>

@@ -1,12 +1,10 @@
-use base64::prelude::BASE64_STANDARD;
+
 use image::GenericImageView;
-use image::ImageReader;
 use mozjpeg::{ColorSpace, Compress};
 use rayon::prelude::*;
-use rayon::result;
 use std::{
     fs,
-    path::{Path, PathBuf},
+    path::{PathBuf},
 };
 
 use crate::utility::{

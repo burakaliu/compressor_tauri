@@ -1,9 +1,10 @@
 [package]
-name = "compressor_tauri"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
-edition = "2021"
+name = "stretta"
+version = "1.0.0"
+description = "A simple and fast tool to easily and safely compress images"
+authors = ["Burak Unlu <burakaliunlu@gmail.com>"]
+edition = "2024"
+license = "Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

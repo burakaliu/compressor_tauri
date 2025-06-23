@@ -3,12 +3,11 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 use base64::prelude::*;
-use rayon::result;
 use serde::{Serialize, Deserialize};
 use crate::webp_compressor::webp_compression;
 use crate::lossy_compressor::lossy_compression;
 use crate::lossless_compressor::lossless_compression;
-use base64::{engine::general_purpose, Engine as _};
+use base64::{engine::general_purpose};
 
 
 
@@ -48,16 +47,6 @@ impl CompressionMethod {
             Self::Lossless => "lossless",
             Self::WebpLossy => "webp_lossy",
             Self::WebpLossless => "webp_lossless",
-        }
-    }
-
-    pub fn from_str(s: &str) -> Option<Self> {
-        match s {
-            "lossy" => Some(Self::Lossy),
-            "lossless" => Some(Self::Lossless),
-            "webp_lossy" => Some(Self::WebpLossy),
-            "webp_lossless" => Some(Self::WebpLossless),
-            _ => Some(Self::WebpLossy), // Default to WebpLossy if unknown
         }
     }
 }
@@ -214,7 +203,7 @@ pub fn save_settings(settings: AppSettings) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn handle_compression() -> Result<(Vec<CompressionResult>), String> {
+pub async fn handle_compression() -> Result<Vec<CompressionResult>, String> {
     let settings = load_settings().unwrap_or_default();
     let mut results: Vec<CompressionResult> = Vec::new();
 
@@ -258,7 +247,7 @@ pub struct ImageData {
 }
 
 #[tauri::command]
-pub async fn handle_images(images: Vec<ImageData>) -> Result<(Vec<CompressionResult>), String> {
+pub async fn handle_images(images: Vec<ImageData>) -> Result<Vec<CompressionResult>, String> {
 
     println!("handle_images function called with {} images", images.len());
     // Get the global input path
@@ -280,10 +269,10 @@ pub async fn handle_images(images: Vec<ImageData>) -> Result<(Vec<CompressionRes
 
         // Extract original filename and create new names
         let original_name = &image_data.filename;
-        let file_stem = std::path::Path::new(original_name)
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("image");
+        // let file_stem = std::path::Path::new(original_name)
+        //     .file_stem()
+        //     .and_then(|s| s.to_str())
+        //     .unwrap_or("image");
         
         println!("Processing image[{}]: {} ({} bytes)", i, original_name, decoded_bytes.len());
         
@@ -346,3 +335,28 @@ pub fn encode_file(path: &str) -> Result<String, String> {
     let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
     Ok(general_purpose::STANDARD.encode(&bytes))
 }
+
+// fn analyze_compression_results(input_count: usize, output_count: usize) -> String {
+//     if input_count == output_count {
+//         format!("✅ All {} images compressed successfully", input_count)
+//     } else if output_count == 0 {
+//         "❌ No images were compressed. Possible causes:
+//         - All input images were corrupted or invalid
+//         - Unsupported image formats
+//         - Insufficient disk space
+//         - Permission issues with output folder".to_string()
+//     } else {
+//         format!("⚠️  Partial compression: {} out of {} images compressed successfully.
+        
+//         Possible causes for failed images:
+//         - Corrupted image data
+//         - Unsupported image formats (some exotic formats may not be supported)
+//         - Images with unusual dimensions or color profiles
+//         - Memory limitations for very large images
+//         - File system errors during processing
+        
+//         Successfully compressed: {}
+//         Failed to compress: {}", 
+//         output_count, input_count, output_count, input_count - output_count)
+//     }
+// }

@@ -2,7 +2,6 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
 export function cn(...inputs: ClassValue[]) {

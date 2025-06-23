@@ -700,27 +700,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "compressor_tauri"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "image",
- "image_compressor",
- "mozjpeg",
- "once_cell",
- "oxipng",
- "rayon",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-fs",
- "tauri-plugin-opener",
- "webp",
-]
-
-[[package]]
 name = "concurrent-queue"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4193,6 +4172,27 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
+name = "stretta"
+version = "1.0.0"
+dependencies = [
+ "base64 0.22.1",
+ "image",
+ "image_compressor",
+ "mozjpeg",
+ "once_cell",
+ "oxipng",
+ "rayon",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-fs",
+ "tauri-plugin-opener",
+ "webp",
+]
 
 [[package]]
 name = "string_cache"

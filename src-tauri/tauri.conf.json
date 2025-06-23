@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "compressor_tauri",
-  "version": "0.1.0",
-  "identifier": "com.compressor.app",
+  "productName": "stretta",
+  "version": "1.0.0",
+  "identifier": "com.burak.stretta",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "compressor_tauri",
+        "title": "stretta",
         "width": 800,
         "height": 600
       }
