@@ -4,7 +4,13 @@
 ![License](https://img.shields.io/badge/license-Apache%202.0-green)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 
-**Stretta** is a simple, fast, private, and intuitive desktop application for compressing images. Built with Rust, Tauri, React, Vite, Tailwind, and shadcn/ui. It does everything you could want an image compressor to do. If it doesn't, let me know and I'll add whatever you want. If you find any bugs, let me know. This was just a simple side project to learn Rust but I can continue expanding it if anyone finds it useful. The rest of the readme is AI slop
+**Stretta** is a simple, fast, private, and intuitive desktop application for compressing images. Built with Rust, Tauri, React, Vite, Tailwind, and shadcn/ui, it does everything you could want an image compressor to do
+
+This was just a simple side project to learn Rust but I can continue expanding it if anyone finds it useful. I'm by no means a good programmer so if you find anything stupid in the code or something that could be improved, feel free to let me know
+
+
+## Installation
+Just head to the releases and download the latest one. dmg is for mac and exe is for windows
 
 ## ✨ Features
 
@@ -33,37 +39,6 @@
 - **WebP Lossy**: Modern format with better compression than JPEG
 - **WebP Lossless**: Superior compression compared to PNG
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- **Node.js** (v18 or higher)
-- **Rust** (latest stable version)
-- **Operating System**: Windows 10+, macOS 10.15+, or Linux
-
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/stretta-image-compressor.git
-   cd stretta-image-compressor
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Run in development mode:**
-   ```bash
-   npm run tauri dev
-   ```
-
-4. **Build for production:**
-   ```bash
-   npm run tauri build
-   ```
-
 ### Quick Start
 
 1. **Launch the application**
@@ -87,38 +62,13 @@
   - `WebP Lossy`: Modern lossy compression with better efficiency than JPEG
   - `WebP Lossless`: Modern lossless compression with better efficiency than PNG
 
-## 🛠️ Development
+## 🛠️ How do it work?
 
-### Project Structure
+- Lossy compression uses the image crate with a JPEG encoder
+- Lossless compression uses the oxipng crate and its PNG encoder 
+- WebP compression uses the webp crate. JPEG compression can sometimes produce smaller file sizes compared to WebP compression, so the program defaults to normal JPEG lossy compression for any files where WebP compression doesn't make sense 
 
-```
-stretta-image-compressor/
-├── src/                    # React frontend source
-│   ├── components/         # Reusable UI components
-│   ├── contexts/          # React contexts (theme, etc.)
-│   ├── pages/             # Main application pages
-│   └── lib/               # Utility functions
-├── src-tauri/             # Rust backend source
-│   ├── src/               # Rust source files
-│   └── Cargo.toml         # Rust dependencies
-├── public/                # Static assets
-└── package.json           # Node.js dependencies
-```
 
-### Available Scripts
-
-- `npm run dev`: Start development server
-- `npm run build`: Build frontend for production
-- `npm run tauri dev`: Run Tauri development server
-- `npm run tauri build`: Build desktop application
-
-### Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## 📝 License
 
