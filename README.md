@@ -7,6 +7,7 @@
 **Stretta** is a simple, fast, private, and intuitive desktop application for compressing images. Built with Rust, Tauri, React, Vite, Tailwind, and shadcn/ui, it does everything you could want an image compressor to do
 
 This was just a simple side project to learn Rust but I can continue expanding it if anyone finds it useful. I'm by no means a good programmer so if you find anything stupid in the code or something that could be improved, feel free to let me know
+### https://burakaliu.github.io/stretta/
 
 
 ## Installation
